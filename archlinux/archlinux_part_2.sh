@@ -106,23 +106,42 @@ enabling_support_32_bits(){
 				#Uncomment the multilib and multilib-testing modules
 				local FILENAME="/etc/pacman.conf"
 
-				#Multilib-testing module
-				TEXT_OLD="#[multilib-testing]"
-				TEXT_NEW="[multilib-testing]"
-				sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
-
-				TEXT_OLD="#Include = /etc/pacman.d/mirrorlist"
-				TEXT_NEW="Include = /etc/pacman.d/mirrorlist"
-				sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
-
+				#############################
 				#Multilib module
-				TEXT_OLD="#[multilib]"
-				TEXT_NEW="[multilib]"
-				sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
+				#############################
 
-				TEXT_OLD="#Include = /etc/pacman.d/mirrorlist"
-				TEXT_NEW="Include = /etc/pacman.d/mirrorlist"
-				sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
+				echo -e "Editing module_multilib..."
+				TEXT_OLD="#\[multilib]"
+				TEXT_OLD_LINE=$(cat $FILENAME_BACKUP | grep -n "$TEXT_OLD" | awk -F: '{print $1}')
+				TEXT_OLD_LINE_AUX=$(($TEXT_OLD_LINE+1))
+
+				#Replace the match line
+				TEXT_NEW="[multilib]"
+				sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME_BACKUP
+
+				#Uncomment the match+1 line
+				TEXT_NEW_AUX="Include = \/etc\/pacman.d\/mirrorlist"
+				sed -i "$TEXT_OLD_LINE_AUX c\\$TEXT_NEW_AUX" $FILENAME_BACKUP
+
+				#############################
+				#Multilib-testing module
+				#############################
+
+				TEXT_OLD="#\[multilib-testing]"
+				TEXT_OLD_LINE=$(cat $FILENAME_BACKUP | grep -n "$TEXT_OLD" | awk -F: '{print $1}')
+				TEXT_OLD_LINE_AUX=$(($TEXT_OLD_LINE+1))
+
+				#Replace the match line
+				TEXT_NEW="[multilib-testing]"
+				sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME_BACKUP
+
+				#Uncomment the match+1 line
+				TEXT_NEW_AUX="Include = \/etc\/pacman.d\/mirrorlist"
+				sed -i "$TEXT_OLD_LINE_AUX c\\$TEXT_NEW_AUX" $FILENAME_BACKUP
+
+				#############################
+				#Verify if file has been created correctly
+				#############################
 
 				vim $FILENAME
 				break

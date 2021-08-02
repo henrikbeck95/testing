@@ -111,8 +111,16 @@ partiting_mounting(){
 	case $IS_BIOS_UEFI in
 		"legacy") 
 			#MUST BE FIXED
-			mkdir -p /mnt/boot/
-			mount $PARTITION_BOOT /mnt/boot/
+			#mkdir -p /mnt/boot/
+			#mount $PARTITION_BOOT /mnt/boot/
+
+			display_message_error "
+			Sorry but I do not how to install GRUB on BIOS legacy machine
+			If you know how, please inform the developer the procedure for implementing it.
+			For now, the commands must be implemented manually
+			Do not worry, this is the last step to be done."
+
+			exit 0
 			;;
 		"uefi") 
 			mkdir -p /mnt/boot/efi/
