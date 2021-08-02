@@ -174,4 +174,4 @@ install_system_base
 creating_fstab
 chroot_mount_part_1
 
-display_message "Script has been finished!"
+display_message_warning "Script has been finished!"

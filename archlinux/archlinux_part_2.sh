@@ -95,7 +95,7 @@ changing_hostname(){
 	127.0.0.1\t\t$QUESTION_HOST.localdomain\t\t$QUESTION_HOST" >> /etc/hosts
 }
 
-#OK - MUST BE IMPLEMENTED SED CUT FUNCTION
+#MUST BE IMPLEMENTED SED CUT FUNCTION - NOT WORKED
 enabling_support_32_bits(){
 	display_message "Enable 32 bits support"
 
@@ -124,7 +124,8 @@ enabling_support_32_bits(){
 				TEXT_NEW="Include = /etc/pacman.d/mirrorlist"
 				sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
 
-				vim $FILENAME	
+				vim $FILENAME
+				break
 				;;
 			[Nn]*) break ;;
 			*) echo "Please answer Y for yes or N for no." ;;
@@ -170,7 +171,6 @@ installing_support_ssh_connection(){
 }
 
 #MUST BE FIXED
-#OK - MUST BE IMPLEMENTED SED CUT FUNCTION
 installing_packages_bootloader(){
 	display_message "Installing packages for the bootloader and the network tools"
 	pacman -S grub efibootmgr networkmanager network-manager-applet wireless_tools wpa_supplicant dialog os-prober mtools dosfstools base-devel linux-headers reflector cron
@@ -185,7 +185,7 @@ installing_packages_bootloader(){
 	TEXT_NEW="MODULES=(btrfs)"
 	sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
 
-	vim $FILENAME #Add text: MODULES=(btrfs)
+	#vim $FILENAME #Add text: MODULES=(btrfs)
 	mkinitcpio -p linux
 
 	#Applying GRUB
@@ -229,6 +229,6 @@ editing_sudo_properties
 installing_support_ssh_connection
 installing_packages_bootloader
 
-display_message "Script has been finished!"
+display_message_warning "Script has been finished!"
 
-echo -e "Verify if everything is ok and then go back to the livecd mode by typing $ exit"
+echo -e "Verify if everything is ok and then go back to the livecd mode by typing: $ exit"

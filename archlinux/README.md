@@ -34,19 +34,7 @@ As long as the script runs it is going to ask you about the settings you need. S
 
 I strongly suggest you to read the scripts while executing it. The script is documented and it explains what you must do in each situation.
 
-<!--
-### Step number zero (preparing the virtual-manager)
-
-- Virtual Machine Manager:
-	1. Click on **Info** buttom.
-	1. Click on **IDE CDROM 1** buttom.
-	1. Erase all the **source path** text.
-	1. Run the ArchLinux virtual machine.
-	1. Select **ArchLinux GNU/Linux** option on GRUB bootloader screen.
-	1. Login your ArchLinux credentials.
--->
-
-### Step number 1 (livecd mode)
+### Step #1 (livecd mode)
 
 - Download the variable file script, give executable permission and execute the variable file script.
 	> $ `curl -L -O https://raw.githubusercontent.com/henrikbeck95/testing/main/archlinux/main.sh && chmod +x ./main.sh && ./main.sh`
@@ -54,7 +42,7 @@ I strongly suggest you to read the scripts while executing it. The script is doc
 - Execute the **livecd mode** script.
 	> $ `./archlinux_part_1.sh`
 
-### Step number 2 (chroot mode)
+### Step #2 (chroot mode)
 
 - Download the variable file script, give executable permission and execute the variable file script.
 	> $ `curl -L -O https://raw.githubusercontent.com/henrikbeck95/testing/main/archlinux/main.sh && chmod +x ./main.sh && ./main.sh`
@@ -76,7 +64,7 @@ I strongly suggest you to read the scripts while executing it. The script is doc
 	1. In case you are using a physical machine, remove the USB pendrive device when the screen turns off and before the machine restart.
 
 <!--
-### Step number 3 (drivers)
+### Step #3 (drivers)
 
 Be aware to execute this step procedure after reboot the machine. This can be very helpful for detecting problems in case of needing.
 
@@ -88,9 +76,9 @@ At this point you have a totally clean ArchLinux operating system installed on y
 - Go to `/root/` directory and execute the script.
 	> $ `cd /root/ && ./archlinux_part_3.sh`
 
-### Step number 4 (graphical interface)
+### Step #4 (graphical interface)
 
-### Step number 5 (software tools)
+### Step #5 (software tools)
 -->
 
 ## Troubleshoots
@@ -109,7 +97,7 @@ In case of troubles this is the first place where you should read before searchi
 
 	1. GRUB
 		> GRUB installation for BIOS legacy is incomplete, you have to do this procedure manually as long this function is not implemented. By the way, take a look into **BIOS does not detect UEFI (Virt-Manager)** troubleshoot maybe it might help you.
-	
+
 	1. If you need remount the ArchLinux as chroot mode, try:
 		> Mounting the root partition: $ `mount $PARTITION_ROOT /mnt/`
 		
@@ -120,3 +108,22 @@ In case of troubles this is the first place where you should read before searchi
 		> Mounting boot: $ `mkdir -p /mnt/boot/efi && mount /dev/vda1 /mnt/boot/efi/`
 		
 		> Listing all the partition table: $ `lsblk`
+	
+	<!--
+	1. If the operating system does not boot
+		> Open Virtual Machine Manager software.
+
+		> Select a **virtual machine**.
+
+		> Click on **Info** buttom.
+		
+		> Click on **IDE CDROM 1** buttom.
+		
+		> Erase all the **source path** text.
+		
+		> Run the ArchLinux virtual machine.
+		
+		> Select **ArchLinux GNU/Linux** option on GRUB bootloader screen.
+		
+		> Login your ArchLinux credentials.
+	-->
