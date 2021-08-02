@@ -69,7 +69,16 @@ partiting_disk(){
 	display_message "Make the partitions"
 
 	#Creating the partitions
-	cfdisk $PARTITION_PATH
+	while true; do
+		cfdisk $PARTITION_PATH
+
+		read -p "Do you want to procedure? [Y/n] " QUESTION_PARTITION
+		case $QUESTION_PARTITION in
+			[Yy]*) break ;;
+			[Nn]*) : ;;
+			*) echo "Please answer Y for yes or N for no." ;;
+		esac
+	done
 	
 	#Formatting the partitions
 	mkfs.fat -F32 $PARTITION_BOOT
