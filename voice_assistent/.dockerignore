@@ -1,7 +1,7 @@
 #Directories
 .git/
 documents/
-media/
+#media/
 others/
 
 #Files
