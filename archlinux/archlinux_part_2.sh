@@ -192,7 +192,7 @@ installing_support_ssh_connection(){
 #MUST BE FIXED
 installing_packages_bootloader(){
 	display_message "Installing packages for the bootloader and the network tools"
-	pacman -S grub efibootmgr networkmanager network-manager-applet wireless_tools wpa_supplicant dialog os-prober mtools dosfstools base-devel linux-headers reflector cron
+	pacman -S grub efibootmgr networkmanager network-manager-applet wireless_tools wpa_supplicant dialog os-prober mtools dosfstools base-devel linux-lts-headers reflector cron
 
 	#Enable the NetworkManager 
 	systemctl enable NetworkManager.service
