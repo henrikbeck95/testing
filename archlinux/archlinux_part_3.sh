@@ -41,7 +41,14 @@ install_desktop_enviroment_gnome(){
 }
 
 install_desktop_enviroment_i3(){
-	pacman -S --noconfirm xorg i3 lxappearance nitrogen dmenu
+	pacman -S --noconfirm xorg i3 lxappearance nitrogen dmenu archlinux-wallpaper
+	
+	#Lock screen
+	git clone https://aur.archlinux.org/ly
+	cd ./ly/
+	makepkg -si
+	
+	systemctl enable ly.service
 }
 
 install_desktop_enviroment_kde(){
@@ -112,7 +119,8 @@ install_softwares_fonts(){
 
 install_software_essential
 install_desktop_utils
-install_desktop_enviroment_gnome
+#install_desktop_enviroment_gnome
+install_desktop_enviroment_i3
 #install_desktop_enviroment_kde
 #install_desktop_enviroment_xfce
 install_driver_audio
