@@ -28,15 +28,9 @@ changing_language_default(){
 }
 
 connecting_internet(){
-	display_message ""
+	display_message "iwctl Wi-Fi connect\n\n> #device list\n> #station wlan0 scan\n> #station wlan0 get-networks\n> #station wlan0 connect <wireless network name>\n> #exit"
 	
 	iwctl #Wi-fi connect
-	#device list
-	#station wlan0 scan
-	#station wlan0 get-networks
-	#station wlan0 connect <wireless network name>
-	#exit
-	
 	ping -c 3 archlinux.org
 }
 
@@ -85,6 +79,7 @@ partiting_disk(){
 	#mkfs.fat -F32 -n ESP $PARTITION_BOOT
 	#mkfs.fat -F32 -n BOOT $PARTITION_BOOT
 	mkfs.btrfs -f $PARTITION_ROOT
+	mkfs.ext4 -f $PARTITION_FILE
 
 	#Listing all the partition table
 	lsblk

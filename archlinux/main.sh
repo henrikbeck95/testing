@@ -29,7 +29,8 @@ export_variables_virtualization(){
 		PARTITION_PATH="/dev/vda"
 		PARTITION_BOOT="/dev/vda1"
 		PARTITION_ROOT="/dev/vda2"
-		PARTITION_SWAP="/dev/vda3"
+		PARTITION_FILE="/dev/vda3"
+		PARTITION_SWAP="/dev/vda4"
 
 	else
 		display_message_warning "Great! You are installing on your host machine!"
@@ -37,7 +38,8 @@ export_variables_virtualization(){
 		PARTITION_PATH="/dev/sda"
 		PARTITION_BOOT="/dev/sda1"
 		PARTITION_ROOT="/dev/sda2"
-		PARTITION_SWAP="/dev/sda3"
+		PARTITION_FILE="/dev/sda3"
+		PARTITION_SWAP="/dev/sda4"
 	fi
 }
 
