@@ -195,7 +195,7 @@ installing_packages_bootloader(){
 	display_message "Installing packages for the bootloader and the network tools"
 	pacman -S grub \
 		base-devel \
-		cron
+		cron \
 		dialog \
 		dosfstools \
 		efibootmgr \
