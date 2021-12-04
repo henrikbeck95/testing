@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
-source "$(pwd)/main.sh"
+PATH_SCRIPT="$(dirname "$(readlink -f "$0")")"
+source "$PATH_SCRIPT/main.sh"
 
 #############################
 #Functions
@@ -134,7 +135,12 @@ partiting_mounting(){
 install_system_base(){
 	display_message "Install the system base"
 
-	pacstrap /mnt/ base linux linux-firmware vim btrfs-progs
+	pacstrap /mnt/ \
+		base\
+		btrfs-progs \
+		linux-firmware \
+		linux-lts \
+		vim \
 
 	case $PROCESSOR in
 		"AuthenticAMD") pacstrap /mnt/ amd-ucode ;;

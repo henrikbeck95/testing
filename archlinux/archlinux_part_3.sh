@@ -15,6 +15,9 @@
 #TEXT_NEW="pt_BR.UTF-8 UTF-8"
 #sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME_BAK
 
+PATH_SCRIPT="$(dirname "$(readlink -f "$0")")"
+source "$PATH_SCRIPT/main.sh"
+
 ##############################
 #Functions
 ##############################
@@ -62,6 +65,35 @@ install_desktop_enviroment_xfce(){
 	sudo systemctl enable lightdm
 }
 
+install_desktop_enviroment(){
+	display_message "Install desktop environment"
+
+	while true; do
+		read -p "Inform you want: [gnome/i3/kde/xfce/none] " QUESTION_DESKTOP_ENVIRONMENT
+
+		case $QUESTION_DESKTOP_ENVIRONMENT in
+			"gnome")
+				install_desktop_enviroment_gnome
+				break
+				;;
+			"i3")
+				install_desktop_enviroment_i3
+				break
+				;;
+			"kde")
+				install_desktop_enviroment_kde
+				break
+				;;
+			"xfce")
+				install_desktop_enviroment_xfce
+				break
+				;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+		esac
+	done
+}
+
 install_driver_audio(){
 	pacman -S --noconfirm alsa-utils pavucontrol
 	#pacman -S --noconfirm pipewire pipewire-alsa pipewire-pulse pipewire-jack
@@ -79,38 +111,48 @@ install_driver_printer(){
 }
 
 install_driver_video(){
-	pacman -S --noconfirm 
-	
+	display_message "Install video driver"
+
+	#VirtualBox virtual machine video driver
+	pacman -S --noconfirm virtualbox-guest-utils
+
+	#VMWare virtual machine video driver
+	pacman -S --noconfirm xf86-video-vmware
+
 	#X Window System QXL driver including Xspice server for virtual machine
 	pacman -S --noconfirm  xf86-video-qxl
 
 	#Select the option according to your graphic video manufacturer.
 	lspci | grep -e VGA -e 3D
-	
-	#For Intel graphic video
-	pacman -S xf86-video-intel
-        
-    #For AMD graphic video
-	pacman -S xf86-video-amdgpu
 
-    #For Nvidia graphic video
-    pacman -S nvidia nvidia-utils nvidia-settings
+	while true; do
+		read -p "Inform you want: [amd/intel/nvidia/none] " QUESTION_SWAP
+
+		case $QUESTION_SWAP in
+			"amd")
+				#For AMD graphic video
+				pacman -S xf86-video-amdgpu
+				break
+				;;
+			"intel")
+				#For Intel graphic video
+				pacman -S xf86-video-intel
+				break
+				;;
+			"nvidia")
+				#For Nvidia graphic video
+				pacman -S nvidia nvidia-utils nvidia-settings
+				break
+				;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+		esac
+	done
 }
 
-install_softwares_useful(){
-	pacman -S --noconfirm alacritty flatpak nautilus rsync
-	#timeshift
-	#paru
-	#firefox
-	#kdenlive simplescreenrecorder obs-studio vlc
-}
-
-install_softwares_theme(){
-	pacman -S --noconfirm arc-gtk-theme arc-icon-theme papirus-icon-theme
-}
-
-install_softwares_fonts(){
-	pacman -S --noconfirm dina-font tamsyn-font bdf-unifont ttf-bitstream-vera ttf-croscore ttf-dejavu ttf-droid gnu-free-fonts ttf-ibm-plex ttf-liberation ttf-linux-libertine noto-fonts ttf-roboto tex-gyre-fonts ttf-ubuntu-font-family ttf-anonymous-pro ttf-cascadia-code ttf-fantasque-sans-mono ttf-fira-mono ttf-hack ttf-fira-code ttf-inconsolata ttf-jetbrains-mono ttf-monofur adobe-source-code-pro-fonts cantarell-fonts inter-font ttf-opensans gentium-plus-font ttf-junicode adobe-source-han-sans-otc-fonts adobe-source-han-serif-otc-fonts noto-fonts-cjk noto-fonts-emoji terminus-font
+install_network_interface(){
+	sudo pacman -S --noconfirm dhcpcd
+	systemctl enable --now dhcpcd
 }
 
 ##############################
@@ -119,46 +161,14 @@ install_softwares_fonts(){
 
 install_software_essential
 install_desktop_utils
-#install_desktop_enviroment_gnome
-install_desktop_enviroment_i3
-#install_desktop_enviroment_kde
-#install_desktop_enviroment_xfce
+install_desktop_enviroment
 install_driver_audio
 install_driver_bluetooth
 install_driver_printer
 install_driver_video
-#install_softwares_useful
-#install_softwares_theme
-#install_softwares_fonts
+install_network_interface
 
-##############################
-#Organizing
-##############################
+display_message_warning "Script has been finished!"
 
-install_softwares_qemu(){
-	#https://computingforgeeks.com/install-kvm-qemu-virt-manager-arch-manjar/
-	
-	pacman -S --noconfirm 
-	
-	systemctl enable libvirtd
-	usermod -aG libvirt henrikbeck95
-}
-
-
-install_terminal(){
-	pacman -S --noconfirm bash-completion
-
-	#https://ohmyposh.dev/docs/linux
-}
-
-#pacman -S avahi ntfs-3g gvfs gvfs-smb nfs-utils inetutils dnsutils hplip acpi acpi_call acpid tlp ipset firewalld sof-firmware nss-mdns
-
-#systemctl enable avahi-daemon
-#systemctl enable tlp # Improve battery life. You can comment this command out if you didn't install tlp, see above
-#systemctl enable reflector.timer
-#systemctl enable fstrim.timer
-#systemctl enable firewalld
-#systemctl enable acpid
-
-#echo "ermanno ALL=(ALL) ALL" >> /etc/sudoers.d/ermanno
+#display_message_warning "\e[1;32mDone! Type exit, umount -a and reboot.\e[0m"
 printf "\e[1;32mDone! Type exit, umount -a and reboot.\e[0m"

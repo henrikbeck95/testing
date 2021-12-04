@@ -20,7 +20,8 @@ By default the script auto identify if you are trying to install the ArchLinux i
 |---        |---    	|---               	|---
 |/dev/sda1  |512M		|EFI System			|vfat
 |/dev/sda2  |**xxxG**	|Linux filesystem   |btrfs
-|/dev/sda3	|8G			|Linux filesystem   |swap
+|/dev/sda3	|**xxxG**	|Linux filesystem   |ext4
+|/dev/sda4	|16G		|Linux filesystem   |swap
 
 - Option 2 (recommended for virtual machine)
 
@@ -28,6 +29,8 @@ By default the script auto identify if you are trying to install the ArchLinux i
 |---        |---    	|---                |---
 |/dev/sda1  |512M		|EFI System			|vfat
 |/dev/sda2  |**xxxG**	|Linux filesystem   |btrfs
+|/dev/sda3  |**xxxG**	|Linux filesystem   |ext4
+|/dev/sda4  |16G		|Linux filesystem   |swap
 
 - Notes
 	1. Replace **xxxG** according with your storage space.
@@ -69,7 +72,6 @@ I strongly suggest you to read the scripts while executing it. The script is doc
 	1. In case you are installing on a virtual machine, consider to backup your virtual machine cloning it.
 	1. In case you are using a physical machine, remove the USB pendrive device when the screen turns off and before the machine restart.
 
-<!--
 ### Step #3 (drivers)
 
 Be aware to execute this step procedure after reboot the machine. This can be very helpful for detecting problems in case of needing.
@@ -82,10 +84,9 @@ At this point you have a totally clean ArchLinux operating system installed on y
 - Go to `/root/` directory and execute the script.
 	> $ `cd /root/ && ./archlinux_part_3.sh`
 
-### Step #4 (graphical interface)
+### Step #4 (graphical interface) ???
 
-### Step #5 (software tools)
--->
+### Step #5 (software tools) ????
 
 ### Troubleshoots
 
@@ -440,6 +441,8 @@ ln -sf /home/henrikbeck95/Pictures/dracula/dracula_wallpaper.png /home/henrikbec
 ### Theme
 
 #### Setup
+
+- Create Dracula directory
 	> $ `mkdir -p $HOME/compilation/dracula/`
 
 <!--
@@ -577,7 +580,7 @@ sudo pacman -Syu
 	cd /tmp/
 	wget -c https://github.com/gokcehan/lf/releases/download/r26/lf-linux-amd64.tar.gz
 	tar -xf /tmp/lf-linux-amd64.tar.gz
-	#sudo mv /tmp/??? /usr/local/bin/lf
+	sudo mv /tmp/lf /usr/local/bin/lf
 	```
 
 	1. Install Oh-My-Posh with all themes
@@ -794,7 +797,7 @@ sudo pacman -U ~/compilation/gestures-0.2.5-1-any.pkg.tar.zst
 
 	```bash
 	#Ignore package updates
-	IgnorePkg   = linux
+	IgnorePkg = linux
 	```
 
 - Uncomment the following lines

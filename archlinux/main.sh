@@ -4,9 +4,18 @@
 #Functions
 #############################
 
+check_if_user_has_root_previledges(){
+	if [[ $UID != 0 ]]; then
+		echo -e "You must be root for preduring this installation!"
+		exit 0;
+	fi
+}
+
 export_variables_bios(){
+	PATH_SCRIPT="$(dirname "$(readlink -f "$0")")"
 	ARCHLINUX_SCRIPT_LINK="https://raw.githubusercontent.com/henrikbeck95/testing/main/archlinux"
-	ARCHLINUX_SCRIPT_PATH="/root"
+	ARCHLINUX_SCRIPT_PATH="$PATH_SCRIPT/"
+	#ARCHLINUX_SCRIPT_PATH="/root/"
 
 	BIOS=$(ls -A /sys/firmware/efi/efivars 2>&1 /dev/null) #Verifying if BIOS supports UEFI
 
@@ -70,12 +79,14 @@ setup_installation_script_download(){
 	curl -L -O $ARCHLINUX_SCRIPT_LINK/archlinux_part_1.sh
 	curl -L -O $ARCHLINUX_SCRIPT_LINK/archlinux_part_2.sh
 	curl -L -O $ARCHLINUX_SCRIPT_LINK/archlinux_part_3.sh
+	curl -L -O $ARCHLINUX_SCRIPT_LINK/archlinux_part_4.sh
 	
 	display_message "Giving the executable permission to the scripts"
 	chmod +x $ARCHLINUX_SCRIPT_PATH/main.sh
 	chmod +x $ARCHLINUX_SCRIPT_PATH/archlinux_part_1.sh
 	chmod +x $ARCHLINUX_SCRIPT_PATH/archlinux_part_2.sh
 	chmod +x $ARCHLINUX_SCRIPT_PATH/archlinux_part_3.sh
+	chmod +x $ARCHLINUX_SCRIPT_PATH/archlinux_part_4.sh
 }
 
 #############################

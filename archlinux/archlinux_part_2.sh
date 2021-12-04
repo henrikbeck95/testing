@@ -1,31 +1,11 @@
 #!/usr/bin/env sh
 
-source "$(pwd)/main.sh"
+PATH_SCRIPT="$(dirname "$(readlink -f "$0")")"
+source "$PATH_SCRIPT/main.sh"
 
 #############################
 #Functions
 #############################
-
-partiting_swap(){
-	display_message "Create the SWAP"
-
-	while true; do
-		read -p "Inform you want: [file/partition/none] " QUESTION_SWAP
-
-		case $QUESTION_SWAP in
-			"file")
-				partiting_swap_file
-				break
-				;;
-			"partition")
-				partiting_swap_partition
-				break
-				;;
-			"none") break ;;
-			*) echo "Please answer file or partition." ;;
-		esac
-	done
-}
 
 #MUST BE FIXED
 partiting_swap_file(){
@@ -56,6 +36,27 @@ partiting_swap_partition(){
 
 	mkswap -f $PARTITION_SWAP
 	swapon $PARTITION_SWAP
+}
+
+partiting_swap(){
+	display_message "Create the SWAP"
+
+	while true; do
+		read -p "Inform you want: [file/partition/none] " QUESTION_SWAP
+
+		case $QUESTION_SWAP in
+			"file")
+				partiting_swap_file
+				break
+				;;
+			"partition")
+				partiting_swap_partition
+				break
+				;;
+			"none") break ;;
+			*) echo "Please answer file or partition." ;;
+		esac
+	done
 }
 
 changing_timezone(){
@@ -154,7 +155,7 @@ enabling_support_32_bits(){
 
 repositories_syncronize(){
 	display_message "Apply the new ArchLinux settings and check for updates"
-	pacman -Syu
+	pacman -Syyuu
 }
 
 changing_password_root(){
@@ -192,7 +193,20 @@ installing_support_ssh_connection(){
 #MUST BE FIXED
 installing_packages_bootloader(){
 	display_message "Installing packages for the bootloader and the network tools"
-	pacman -S grub efibootmgr networkmanager network-manager-applet wireless_tools wpa_supplicant dialog os-prober mtools dosfstools base-devel linux-lts-headers reflector cron
+	pacman -S grub \
+		base-devel \
+		cron
+		dialog \
+		dosfstools \
+		efibootmgr \
+		linux-lts-headers \
+		mtools \
+		networkmanager \
+		network-manager-applet \
+		os-prober \
+		reflector \
+		wireless_tools \
+		wpa_supplicant \
 
 	#Enable the NetworkManager 
 	systemctl enable NetworkManager.service
@@ -240,7 +254,7 @@ partiting_swap
 changing_timezone
 changing_language
 changing_hostname
-enabling_support_32_bits
+eenabling_support_32_bits
 repositories_syncronize
 changing_password_root
 creating_new_user
@@ -249,5 +263,4 @@ installing_support_ssh_connection
 installing_packages_bootloader
 
 display_message_warning "Script has been finished!"
-
-echo -e "Verify if everything is ok and then go back to the livecd mode by typing: $ exit"
+display_message_warning "Verify if everything is ok and then go back to the livecd mode by typing: $ exit"
