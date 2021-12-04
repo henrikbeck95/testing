@@ -39,6 +39,8 @@ By default the script auto identify if you are trying to install the ArchLinux i
 
 ## Installation setup
 
+### Description
+
 As long as the script runs it is going to ask you about the settings you need. Some times the script is going to open the file with the editor for you manually configuring it according to your preferences.
 
 I strongly suggest you to read the scripts while executing it. The script is documented and it explains what you must do in each situation.
