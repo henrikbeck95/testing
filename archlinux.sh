@@ -60,7 +60,8 @@ This is a guided step by step for installing a custom ArchLinux with full setup
 -p1\t--part-01\t\tInstall ArchLinux system base $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
 -p2\t--part-02\t\tConfigure and install ArchLinux essential system softwares $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
 -p3\t--part-03\t\tInstall ArchLinux drivers, useful softwares and custom shell $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
--p4\t--part-04\t\tInstall softwares to the final user
+-p4\t--part-04\t\tInstall support platforms $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
+-p5\t--part-05\t\tInstall softwares to the final user
 -t\t--testing\t\tTesting selected functions for debugging this script file
 "
 
@@ -151,7 +152,14 @@ tools_edit_file(){
 
 tools_install_software_aur(){
 	paru -S $@
+	#paru -S $@ --needed
+	#paru -S $@ --noconfirm
+	#paru -S $@ --noconfirm --needed
+
 	#yay -S $@
+	#yay -S $@ --needed
+	#yay -S $@ --noconfirm
+	#yay -S $@ --noconfirm --needed
 }
 
 tools_install_software_flatpak(){
@@ -162,10 +170,17 @@ tools_install_software_pacman(){
 	pacman -S $@
 	#pacman -S $@ --needed
 	#pacman -S $@ --noconfirm
+	#pacman -S $@ --noconfirm --needed 
 }
 
 tools_install_software_pip(){
 	pip3 install $@
+}
+
+tools_repositories_syncronize_aur(){
+	display_message "Apply the new ArchLinux settings and check for updates"
+	paru -Syyuu
+	#yay -Syyuu
 }
 
 tools_repositories_syncronize_pacman(){
@@ -287,6 +302,8 @@ changing_timezone(){
 	
 	display_message "Sync UTC clock with the hardware machine"
 	hwclock --systohc --utc #UTC clock
+
+	#timedatectl set-ntp true
 	#hwclock --systohc #Hardware clock
 }
 
@@ -691,19 +708,14 @@ install_desktop_enviroment_i3(){
 	tools_install_software_pacman \
         xorg \
         i3 \
+        dmenu \
+		feh \
         lxappearance \
         nitrogen \
-        dmenu \
-        archlinux-wallpaper
+		polybar \
+		rofi
 	
-	#Lock screen
-	git clone https://aur.archlinux.org/ly
-	cd ./ly/
-	makepkg -si
-	
-	systemctl enable ly.service
-
-	display_message_warning "$MESSAGE_RESTART"
+	install_lock_screen
 }
 
 install_desktop_enviroment_kde(){
@@ -737,6 +749,41 @@ install_desktop_utils(){
 	tools_install_software_pacman \
         xdg-user-dirs \
         xdg-utils
+}
+
+install_lock_screen(){
+	display_message "Install lock screen"
+
+	while true; do
+		read -p "Inform what you want: [lightdm/ly/none] " QUESTION_LOCK_SCREEN
+
+		case $QUESTION_LOCK_SCREEN in
+			"lightdm")
+                gnome-disk-utility \
+                lightdm \
+                lightdm-gtk-greeter \
+                lightdm-gtk-greeter-settings
+
+                systemctl enable lightdm.service -f
+                systemctl set-default graphical.target
+                
+				break
+				;;
+            "ly")
+                git clone https://aur.archlinux.org/ly
+                cd ./ly/
+                makepkg -si
+                
+                systemctl enable ly.service
+
+				break
+				;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+		esac
+	done
+
+	display_message_warning "$MESSAGE_RESTART"
 }
 
 install_network_interface(){
@@ -915,6 +962,9 @@ install_softwares_pacman_essential(){
         unzip \
         wget
 
+    	#arandr \
+		#xorg-xrandr \
+
 	#Laptop battery improvement
 	tools_install_software_pacman \
 		acpi \
@@ -951,11 +1001,14 @@ install_softwares_pacman_extra(){
 		dolphin \
 		gthumb \
 		lolcat \
+		neofetch \
 		nmap \
 		okular \
 		spectacle
+        #archlinux-wallpaper \
 		#cmatrix \
 		#firefox \
+		#go \
 		#kdenlive \
 		#nautilus \
 		#obs-studio \
@@ -1031,36 +1084,152 @@ install_support_pip(){
 }
 
 #MUST BE FIXED
+install_support_podman(){
+	tools_edit_file /etc/default/grub
+	#Edit the line: GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet video=1920x1080 cgroup_no_v1 "all""
+
+	grub-mkconfig -o /boot/grub/grub.cfg
+	display_message_warning "$MESSAGE_RESTART"
+
+	tools_install_software_pacman \
+		buildah \
+		crun \
+		podman
+
+		#cgroups
+
+	#systemctl enable --now podman.service
+	systemctl enable --now podman.socket
+
+	##Check the value of the Podman previledges
+	# case $(sysctl kernel.unprivileged_userns_clone) in
+	# 	0) 
+	# 	1) 
+	# 	*) display_message_error "" ;;
+	# esac
+
+	#Rootless
+	touch /etc/{subuid,subgid}
+
+	usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $QUESTION_USERNAME
+	grep $QUESTION_USERNAME /etc/subgid /etc/subuid
+	
+	#echo -e "$QUESTION_USERNAME:100000:65536" > /etc/subuid
+	#echo -e "$QUESTION_USERNAME:100000:65536" > /etc/subgid
+
+	#echo -e "buildah:100000:65536" >> /etc/subuid
+	#echo -e "buildah:100000:65536" >> /etc/subgid
+	
+	#Check if everything is set up rightly
+	tools_edit_file /etc/subgid /etc/subuid
+
+	#Propagate changes to subuid and subgid
+	podman system migrate
+
+	#display_message_warning "$MESSAGE_RESTART"
+
+	#sudo dnf install -y podman-docker
+	#podman pull docker.io/centos
+
+	##############################
+	#Podman Ngnix example
+	##############################
+	#
+	#man podman
+	#podman search nginx
+	#podman pull docker.io/library/nginx
+	#podman images
+	#podman run -dt 
+	#sudo mkdir -p /web/
+	#podman run -d -v /web/:/usr/share/nginx/html -p 8080:80/tcp nginx
+	#podman ps
+	#
+	##############################
+	#Create a webpage, access it passthrought the firewall
+	##############################
+	#
+	#chown $QUESTION_USERNAME: /web/
+	#echo -e "Hello world from the container" > /web/index.html
+	#sudo firewall-cmd --add-port=8080/tcp
+	#xgd-open http://localhost:8080
+	#sudo firewall-cmd --add-port=8080/tcp --permanent
+	#
+	##############################
+	#Create a systemd instance for persistenting the container after reboot
+	##############################
+	#
+	#sudo loginctl enable-linger $QUESTION_USERNAME
+	#loginctl user-status $QUESTION_USERNAME
+	#mkdir -p $HOME/.config/systemd/user/
+	#cd $HOME/.config/systemd/user/
+	#podman generate systemd --name <container_name> --files
+	#systemctl --user daemon-reload
+	#systemctl --user enable <container_name>
+	#display_message_warning "$MESSAGE_RESTART"
+	#
+	##############################
+	#Disable a systemd instance
+	##############################
+	#
+	#podman ps
+	#systemctl --user status <container_name>
+	#systemctl --user disable --now <container_name>
+	#podman ps
+	#podman ps -a
+	#
+	##############################
+}
+
+#MUST BE FIXED
 #MUST BE IMPROVED
 install_support_qemu(){
 	#Reference
 	#[Arch Linux: Instalação do virt-manager](https://www.youtube.com/watch?v=FGeI4nSOHto)
 	#[](https://computingforgeeks.com/install-kvm-qemu-virt-manager-arch-manjar/)
+	#[](https://computingforgeeks.com/complete-installation-of-kvmqemu-and-virt-manager-on-arch-linux-and-manjaro/)
+
+	#Check if virtualization procedure is available on current machine
+	LC_ALL=C lscpu | grep Virtualization
 
 	#Virt-Manager
+    #The Ebtables is an internet brigde software
+
 	tools_install_software_pacman \
-		qemu \
-		libvirt \
-		ebtables \
-		dnsmasq \
 		bridge-utils \
+		dnsmasq \
+		ebtables \
+		libvirt \
 		openbsd-netcat \
+		qemu \
 		virt-manager
+
+		#iptables \
+		#vde2 \
+        #virt-viewer
+	
+	#tools_install_software_aur \
+        #libguestfs
 
 		echo -e 'unix_sock_group = "libvirt"' > /etc/libvirt/libvirtd.conf
 		echo -e 'unix_sock_rw_perms = "0770"' > /etc/libvirt/libvirtd.conf
 		#tools_edit_file /etc/libvirt/libvirtd.conf
 
-		systemctl enable --now libvirtd
-		systemctl enable --now dnsmasq
+    #Enabling Systemd process
+	systemctl enable --now libvirtd.service
+	systemctl enable --now dnsmasq.service
 
-		gpasswd -a $QUESTION_USERNAME libvirt
-		#usermod -aG libvirt $QUESTION_USERNAME
+	#Add user to the following groups
+	gpasswd -a $QUESTION_USERNAME libvirt
+	#usermod -G libvirt -a $QUESTION_USERNAME
+	#usermod -aG libvirt $QUESTION_USERNAME
 
-		#virsh net-dumpxml default > br1.xml
-		#vim br1.xml
+	#Create a virtual machine
+    #qemu-img convert -f vdi -O qcow2 Ubuntu\ 20.04.vdi /var/lib/libvirt/images/ubuntu-20-04.qcow2
 
-		display_message_warning "$MESSAGE_RESTART"
+	#virsh net-dumpxml default > br1.xml
+	#vim br1.xml
+
+	display_message_warning "$MESSAGE_RESTART"
 
 	#Cockpit
 	tools_install_software_pacman \
@@ -1069,8 +1238,10 @@ install_support_qemu(){
 		cockpit-pcp \
 		cockpit-podman
 
+    #Enabling Systemd process
 	systemctl enable --now cockpit.socket
 
+	#Access Cockpit localhost from browser
 	#xdg-open https://localhost:9090/
 }
 
@@ -1334,15 +1505,6 @@ calling_part_03(){
 	install_softwares_pacman_extra
 	install_softwares_pacman_manually
 	install_softwares_binary
-	#install_softwares_compilation
-	#install_softwares_github
-	#install_softwares_aur
-	#install_support_debtap
-	#install_support_docker
-	#install_support_flatpak
-	#install_support_pip
-	#install_support_snap
-	#install_support_wine
 	install_support_qemu
 	install_shell_zsh
 
@@ -1353,12 +1515,25 @@ calling_part_03(){
 }
 
 calling_part_04(){
+	install_support_debtap
+	install_support_docker
+	install_support_flatpak
+	install_support_pip
+	install_support_podman
+	install_support_snap
+	install_support_wine
+}
+
+calling_part_05(){
 	#install_softwares_binary
 	install_softwares_github
 	install_softwares_aur
 	install_softwares_compilation
 	install_softwares_flatpak
 	install_softwares_pip
+
+	tools_repositories_syncronize_aur
+	tools_repositories_syncronize_pacman
 }
 
 calling_testing(){
@@ -1397,6 +1572,7 @@ case $AUX1 in
 	"-p2" | "--part-02") calling_part_02 ;;
 	"-p3" | "--part-03") calling_part_03 ;;
 	"-p4" | "--part-04") calling_part_04 ;;
+	"-p5" | "--part-05") calling_part_05 ;;
 	"-t" | "--testing") calling_testing ;;
 	*) echo -e "$MESSAGE_ERROR" ;;
 esac
