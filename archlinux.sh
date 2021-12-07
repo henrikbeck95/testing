@@ -5,9 +5,12 @@
 #############################
 
 AUX1=$1
+AUX2=$2
 
-DEBUG="false"
-#DEBUG="true"
+case $AUX2 in
+	"--debug") DEBUG="true" ;;
+	*) DEBUG="false" ;;
+esac
 
 TERMINAL_COLOR_BLACK="\033[0;30m"
 TERMINAL_COLOR_BLUE="\033[0;34m"
@@ -93,9 +96,10 @@ $TERMINAL_COLOR_GREEN_LIGHT $ sudo ./archlinux.sh -p5 $TERMINAL_COLOR_END then $
 
 - Enjoy it!
 
-[Parameters]
+[Parameters - First]
 -h\t--help\t-?\t\tDisplay this help message
 -e\t--edit\t\t\tEdit this script file
+-ao\t--audio-output\t\tCheck if audio output is working
 -b\t--check-battery\t\tCheck battery level (on laptop device)
 -p1\t--part-01\t\tInstall ArchLinux system base $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
 -p2\t--part-02\t\tConfigure and install ArchLinux essential system softwares $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
@@ -103,6 +107,11 @@ $TERMINAL_COLOR_GREEN_LIGHT $ sudo ./archlinux.sh -p5 $TERMINAL_COLOR_END then $
 -p4\t--part-04\t\tInstall support platforms $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
 -p5\t--part-05\t\tInstall softwares to the final user
 -t\t--testing\t\tTesting selected functions for debugging this script file
+
+[Parameters - Second]
+Enable debug mode from this script by adding $TERMINAL_COLOR_BLUE_LIGHT $ --debug $TERMINAL_COLOR_END flag. Once this flag is enabled you are up confirm or deny each software installation setup.
+
+If this flag is not enabled this script is going to install a default settings without asking to confirm or deny each software installation setup.
 "
 
 MESSAGE_RESTART="Must restart current session for apply the new settings"
@@ -145,6 +154,10 @@ tools_backup_create(){
 tools_check_battery_level(){
 	local BATTERY_LEVEL=$(cat /sys/class/power_supply/BAT0/capacity)
 	display_message_success "Battery level current: $BATTERY_LEVEL %"
+}
+
+tools_check_if_audio_output_is_working(){
+	speaker-test -t wav -c 6
 }
 
 tools_check_if_internet_connection_exists(){
@@ -1782,6 +1795,7 @@ clear
 case $AUX1 in
 	"" | "-h" | "--help" | "-?") echo -e "$MESSAGE_HELP" ;;
 	"-e" | "--edit") $EDITOR $0 ;;
+	"-ao" | "--audio-output") tools_check_if_audio_output_is_working ;;
 	"-b" | "--check-battery") tools_check_battery_level ;;
 	"-p1" | "--part-01") calling_part_01 ;;
 	"-p2" | "--part-02") calling_part_02 ;;
