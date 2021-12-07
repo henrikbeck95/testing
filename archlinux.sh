@@ -6,6 +6,9 @@
 
 AUX1=$1
 
+DEBUG="false"
+#DEBUG="true"
+
 TERMINAL_COLOR_BLACK="\033[0;30m"
 TERMINAL_COLOR_BLUE="\033[0;34m"
 TERMINAL_COLOR_BLUE_LIGHT="\033[1;34m"
@@ -63,7 +66,7 @@ $TERMINAL_COLOR_RED_LIGHT # curl -O -L $ARCHLINUX_SCRIPT_LINK $TERMINAL_COLOR_EN
 - Then give executable permission to this script and run it
 $TERMINAL_COLOR_RED_LIGHT # chmod +x ./archlinux.sh && ./archlinux.sh -p1 $TERMINAL_COLOR_END
 
-- When ArchLinux gets mounted as chroot, download it again, give the executable permission and run it by using:
+- When ArchLinux gets mounted as chroot, go to $TERMINAL_COLOR_RED_LIGHT /root/ directory $TERMINAL_COLOR_END download it again, give the executable permission and run it by using:
 $TERMINAL_COLOR_RED_LIGHT # ./archlinux.sh -p2 $TERMINAL_COLOR_END
 
 - When the second part from this script gets finished, type:
@@ -178,42 +181,83 @@ tools_edit_file(){
 	vim -O $@
 }
 
+#TESTING
 tools_install_software_aur(){
-	paru -S $@
-	#paru -S $@ --needed
-	#paru -S $@ --noconfirm
-	#paru -S $@ --noconfirm --needed
+	case $DEBUG in
+		"false") 
+			paru -S $@ --noconfirm
+			#paru -S $@ --noconfirm --needed
 
-	#yay -S $@
-	#yay -S $@ --needed
-	#yay -S $@ --noconfirm
-	#yay -S $@ --noconfirm --needed
+			#yay -S $@ --noconfirm
+			#yay -S $@ --noconfirm --needed
+		"true") 
+			paru -S $@
+			#paru -S $@ --needed
+
+			#yay -S $@
+			#yay -S $@ --needed
+		*) display_message_error "$MESSAGE_ERROR" ;;
+	esac
 }
 
+#TESTING
 tools_install_software_flatpak(){
-	flatpak install flathub $@
+	case $DEBUG in
+		"false") flatpak install flathub $@ -y
+		"true") flatpak install flathub $@
+		*) display_message_error "$MESSAGE_ERROR" ;;
+	esac
 }
 
+#TESTING
 tools_install_software_pacman(){
-	pacman -S $@
-	#pacman -S $@ --needed
-	#pacman -S $@ --noconfirm
-	#pacman -S $@ --noconfirm --needed 
+	case $DEBUG in
+		"false") 
+			pacman -S $@ --noconfirm
+			#pacman -S $@ --noconfirm --needed 
+		"true") 
+			pacman -S $@
+			#pacman -S $@ --needed
+		*) display_message_error "$MESSAGE_ERROR" ;;
+	esac
 }
 
+#TESTING
+#MUST BE FIXED
 tools_install_software_pip(){
-	pip3 install $@
+	case $DEBUG in
+		"false") pip3 install $@
+		"true") pip3 install $@
+		*) display_message_error "$MESSAGE_ERROR" ;;
+	esac
 }
 
+#TESTING
 tools_repositories_syncronize_aur(){
 	display_message "Apply the new ArchLinux settings and check for updates"
-	paru -Syyuu
-	#yay -Syyuu
+
+	case $DEBUG in
+		"false") 
+			paru -Syyuu --noconfirm
+			#yay -Syyuu --noconfirm
+		"true") 
+			paru -Syyuu
+			#yay -Syyuu
+		*) display_message_error "$MESSAGE_ERROR" ;;
+	esac
 }
 
+#TESTING
 tools_repositories_syncronize_pacman(){
 	display_message "Apply the new ArchLinux settings and check for updates"
-	pacman -Syyuu
+
+	case $DEBUG in
+		"false") 
+			pacman -Syyuu --noconfirm
+		"true") 
+			pacman -Syyuu
+		*) display_message_error "$MESSAGE_ERROR" ;;
+	esac
 }
 
 variables_export_bios(){
@@ -565,6 +609,7 @@ installing_bootloader(){
 
 	#vim $FILENAME #Add text: MODULES=(btrfs)
 	mkinitcpio -p linux
+	#mkinitcpio -p linux-lts
 
 	#Applying GRUB
 	case $IS_BIOS_UEFI in #MUST BE FIXED
@@ -1032,6 +1077,10 @@ install_softwares_flatpak(){
 install_softwares_pacman_essential(){
     display_message "Install softwares from Pacman - essential"
 
+	#Kernel
+	tools_install_software_pacman \
+		linux-lts
+
 	#Useful
 	tools_install_software_pacman \
         alacritty \
@@ -1420,6 +1469,11 @@ install_support_wine(){
 install_system_base(){
     display_message "Install ArchLinux system base"
 
+	#Kernel
+	#pacstrap /mnt/ \
+		#linux-lts \
+
+	#System base
 	pacstrap /mnt/ \
 		base \
 		btrfs-progs \
@@ -1611,7 +1665,7 @@ calling_part_02(){
     changing_timezone
     changing_language
     changing_hostname
-    eenabling_support_32_bits
+    enabling_support_32_bits
     tools_repositories_syncronize_pacman
     changing_password_root
     creating_new_user
