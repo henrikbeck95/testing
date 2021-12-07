@@ -458,6 +458,7 @@ creating_new_user(){
 	gpasswd -a $QUESTION_USERNAME storage
 	gpasswd -a $QUESTION_USERNAME users
 	gpasswd -a $QUESTION_USERNAME video
+	gpasswd -a $QUESTION_USERNAME wheel
 }
 
 connecting_internet_wifi(){
@@ -720,11 +721,37 @@ install_driver_bluetooth(){
 install_driver_printer(){
     display_message "Install printer drivers"
 
-	tools_install_software_pacman \
-        cups
+	while true; do
+		read -p "Inform what you want: [epson/hp/none] " QUESTION_PRINTER
 
-	systemctl enable --now cups.service
-    display_message_success "Printer drivers have been successfully installed"
+        case $QUESTION_PRINTER in
+            "epson")
+				tools_install_software_pacman \
+					cups
+
+				systemctl enable --now cups.service
+
+				#Epson L120 printer
+                #tools_install_software_aur XXX
+
+                break
+                ;;
+            "hp")
+				#HP printer device manager
+                tools_install_software_pacman \
+					cups \
+					hplip
+
+				systemctl enable --now cups.service
+
+                break
+                ;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+        esac
+	done
+
+    display_message_success "Printer drivers for $QUESTION_PRINTER have been successfully installed"
 }
 
 install_driver_graphic_video(){
@@ -889,6 +916,64 @@ install_desktop_utils(){
         xdg-utils
 
     display_message_success "Desktop utils have been successfully installed"
+}
+
+install_firewall(){
+    display_message "Install firewall"
+
+	while true; do
+		read -p "Inform what you want: [firewalld/gufw/none] " QUESTION_FIREWALL
+
+        case $QUESTION_FIREWALL in
+            "firewalld")
+				tools_install_software_pacman \
+					firewalld
+
+				systemctl enable firewalld.service
+				#systemctl enable --now firewalld.service
+
+                break
+                ;;
+            "gufw")
+                tools_install_software_pacman \
+					gufw
+
+				#systemctl enable --now cups.service
+
+                break
+                ;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+        esac
+	done
+
+    display_message_success "Firewall $QUESTION_FIREWALL has been successfully installed"
+}
+
+install_laptop_battery_improvement(){
+    display_message "Install battery improvement for laptop device"
+
+	while true; do
+		read -p "Inform what you want: [yes/none] " QUESTION_LAPTOP_BATTERY_IMPROVEMENT
+
+        case $QUESTION_LAPTOP_BATTERY_IMPROVEMENT in
+            "yes")
+                tools_install_software_pacman \
+                    acpi \
+                    acpi_call \
+                    acpid \
+                    tlp
+
+                systemctl enable acpid #???
+                systemctl enable tlp #Improve battery life for laptop.
+
+                display_message_success "Battery improvement for laptop device has been installed"
+                break
+                ;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+        esac
+	done
 }
 
 install_lock_screen(){
@@ -1114,7 +1199,8 @@ install_softwares_pacman_essential(){
 
 	#Kernel
 	tools_install_software_pacman \
-		linux-lts
+		linux
+		#linux-lts
 
 	#Useful
 	tools_install_software_pacman \
@@ -1144,18 +1230,10 @@ install_softwares_pacman_essential(){
     	#arandr \
 		#xorg-xrandr \
 
-	#Laptop battery improvement
-	tools_install_software_pacman \
-		acpi \
-		acpi_call \
-		acpid \
-		tlp
-
 	#Others
 	tools_install_software_pacman \
 		avahi \
 		dnsutils \
-		firewalld \
 		gvfs \
 		gvfs-smb \
 		inetutils \
@@ -1164,16 +1242,10 @@ install_softwares_pacman_essential(){
 		nss-mdns \
 		sof-firmware
 
-		#gufw #Firewall
-		#hplip #HP printer
-
 	systemctl enable avahi-daemon
-	systemctl enable acpid
-	systemctl enable firewalld
 	systemctl enable fstrim.timer
 	systemctl enable reflector.timer
-	systemctl enable tlp #Improve battery life for laptop.
-
+	
     display_message_success "Softwares from Pacman has been installed - essential"
 }
 
@@ -1506,7 +1578,8 @@ install_system_base(){
 
 	#Kernel
 	pacstrap /mnt/ \
-		linux-lts \
+		linux
+		#linux-lts
 
 	#System base
 	pacstrap /mnt/ \
@@ -1722,6 +1795,8 @@ calling_part_03(){
     install_driver_printer
     install_driver_graphic_video
     install_network_interface
+	install_firewall
+	install_laptop_battery_improvement
 	install_softwares_pacman_essential
 	install_softwares_pacman_extra
 	install_softwares_pacman_manually
