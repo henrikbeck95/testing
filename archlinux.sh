@@ -421,11 +421,6 @@ changing_timezone(){
     display_message_success "Timezone has been successfully set"
 }
 
-mount_chroot(){
-	display_message "Log in as root on the ArchLinux which is going to be installed (not the installer iso one)"
-	arch-chroot /mnt/
-}
-
 creating_fstab(){
 	display_message "Generate the /etc/fstab file"
 	genfstab -U /mnt >> /mnt/etc/fstab
@@ -545,10 +540,9 @@ editing_sudo_properties(){
 	TEXT_OLD="# %wheel ALL=(ALL) ALL"
 	TEXT_NEW="%wheel ALL=(ALL) ALL"
 	sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
+	#EDITOR=vim visudo
 
     display_message_success "Sudoers has been successfully set to allow all users to have sudo access"
-
-	EDITOR=vim visudo
 
 	#read -p "Inform the username you want: " QUESTION_USERNAME #henrikbeck95
 	#echo "$QUESTION_USERNAME ALL=(ALL) ALL" >> /etc/sudoers.d/$QUESTION_USERNAME
@@ -624,7 +618,6 @@ installing_bootloader(){
 		dialog \
 		dosfstools \
 		efibootmgr \
-		linux-lts-headers \
 		mtools \
 		networkmanager \
 		network-manager-applet \
@@ -633,6 +626,8 @@ installing_bootloader(){
 		wireless_tools \
 		wpa_supplicant
 
+		#linux-lts-headers \
+		
 	#Enable the NetworkManager 
 	systemctl enable --now NetworkManager.service
 
@@ -642,10 +637,9 @@ installing_bootloader(){
 	TEXT_OLD="MODULES=()"
 	TEXT_NEW="MODULES=(btrfs)"
 	sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
-
-	#vim $FILENAME #Add text: MODULES=(btrfs)
-	#mkinitcpio -p linux
-	mkinitcpio -p linux-lts
+	#tools_edit_file $FILENAME #Add text: MODULES=(btrfs)
+	
+	kernel_linux_init_grub
 
 	#Applying GRUB
 	case $IS_BIOS_UEFI in #MUST BE FIXED
@@ -1197,11 +1191,6 @@ install_softwares_flatpak(){
 install_softwares_pacman_essential(){
     display_message "Install softwares from Pacman - essential"
 
-	#Kernel
-	tools_install_software_pacman \
-		linux
-		#linux-lts
-
 	#Useful
 	tools_install_software_pacman \
         alacritty \
@@ -1576,11 +1565,6 @@ install_support_wine(){
 install_system_base(){
     display_message "Install ArchLinux system base"
 
-	#Kernel
-	pacstrap /mnt/ \
-		linux
-		#linux-lts
-
 	#System base
 	pacstrap /mnt/ \
 		base \
@@ -1598,6 +1582,84 @@ install_system_base(){
 	esac
 
     display_message_success "ArchLinux system base has been installed"
+}
+
+kernel_linux_install_part_01(){
+    display_message "Install Linux kernel - part 01 (with Pacstrap)"
+
+	while true; do
+		read -p "Inform what you want: [current/lts/none] " QUESTION_KERNEL
+
+        case $QUESTION_KERNEL in
+            "current")
+                pacstrap /mnt/ linux
+                break
+                ;;
+            "lts")
+                pacstrap /mnt/ linux-lts
+                break
+                ;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+        esac
+	done
+    
+    display_message_success "Linux kernel has been installed"
+}
+
+kernel_linux_install_part_02(){
+    display_message "Install Linux kernel - part 02 (with Pacman)"
+
+	while true; do
+		read -p "Inform what you want: [current/lts/none] " QUESTION_KERNEL
+
+        case $QUESTION_KERNEL in
+            "current")
+                tools_install_software_pacman \
+					linux \
+					linux-headers
+                break
+                ;;
+            "lts")
+                tools_install_software_pacman \
+					linux-lts \
+					linux-lts-headers
+                break
+                ;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+        esac
+	done
+
+    display_message_success "Linux kernel has been installed"
+}
+
+kernel_linux_init_grub(){
+    display_message "Init Linux kernel - GRUB"
+
+	while true; do
+		read -p "Inform what you want: [current/lts/none] " QUESTION_KERNEL
+
+        case $QUESTION_KERNEL in
+            "current")
+                mkinitcpio -p linux
+                break
+                ;;
+            "lts")
+                mkinitcpio -p linux-lts
+                break
+                ;;
+			"none") break ;;
+			*) echo "Please answer question." ;;
+        esac
+	done
+
+    display_message_success "Linux kernel has been inited with GRUB"
+}
+
+mount_chroot(){
+	display_message "Log in as root on the ArchLinux which is going to be installed (not the installer iso one)"
+	arch-chroot /mnt/
 }
 
 partiting_disk(){
@@ -1759,6 +1821,7 @@ calling_part_01(){
 
     partiting_disk
     partiting_mounting
+	kernel_linux_install_part_01
     install_system_base
     creating_fstab
     mount_chroot
@@ -1779,6 +1842,7 @@ calling_part_02(){
     creating_new_user
     editing_sudo_properties
     install_support_ssh
+	#kernel_linux_install_part_02
     installing_bootloader
 
     display_message_success "Script has been finished!"
@@ -1797,6 +1861,7 @@ calling_part_03(){
     install_network_interface
 	install_firewall
 	install_laptop_battery_improvement
+	#kernel_linux_install_part_02
 	install_softwares_pacman_essential
 	install_softwares_pacman_extra
 	install_softwares_pacman_manually
