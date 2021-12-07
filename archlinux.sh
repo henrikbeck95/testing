@@ -1480,8 +1480,8 @@ install_system_base(){
     display_message "Install ArchLinux system base"
 
 	#Kernel
-	#pacstrap /mnt/ \
-		#linux-lts \
+	pacstrap /mnt/ \
+		linux-lts \
 
 	#System base
 	pacstrap /mnt/ \
