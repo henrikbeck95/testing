@@ -47,8 +47,8 @@ LAYOUT_KEYBOARD="br-abnt2"
 ARCHLINUX_SCRIPT_LINK="https://raw.githubusercontent.com/henrikbeck95/testing/main/archlinux.sh"
 
 MESSAGE_HELP="
-\t\t\t\tArchlinux installation setup
-\t\t\t\t----------------------------
+\t\t\t\t\t\tArchlinux installation setup
+\t\t\t\t\t\t----------------------------
 
 [Credits]
 Author: Henrik Beck
@@ -57,7 +57,17 @@ License: GPL3
 Version: v.1.0.0
 
 [Description]
-This is a guided step by step for installing a custom ArchLinux with full setup
+This is a guided step by step for installing a custom ArchLinux with full setup.
+
+- The disk partition table is should be set like this (change it according to your needs when Cfdisks starts):
+\tPhysical machine\tVirtual machine\t\tPARTITION\tFILE SYSTEM\tSIZE
+\t/dev/sda/1\t\t/dev/vda/1\t\tBOOT\t\tFAT 32\t\t0.5 GB
+\t/dev/sda/2\t\t/dev/vda/2\t\tROOT\t\tBTRFS\t\t800 GB
+\t/dev/sda/3\t\t/dev/vda/3\t\tFILE\t\tEXT 4\t\t115 GB
+\t/dev/sda/4\t\t/dev/vda/4\t\tSWAP\t\tSWAP\t\t16 GB
+
+[Warnings]
+This script is going to erase all partitions from your disk. Be sure you really want to do this.
 
 [Instructions]
 Once you have booted your computer with a ArchLinux pendrive device, download this script by running:
@@ -66,7 +76,7 @@ $TERMINAL_COLOR_RED_LIGHT # curl -O -L $ARCHLINUX_SCRIPT_LINK $TERMINAL_COLOR_EN
 - Then give executable permission to this script and run it
 $TERMINAL_COLOR_RED_LIGHT # chmod +x ./archlinux.sh && ./archlinux.sh -p1 $TERMINAL_COLOR_END
 
-- When ArchLinux gets mounted as chroot, go to $TERMINAL_COLOR_RED_LIGHT /root/ $TERMINAL_COLOR_END directory and download it again, give the executable permission and run it by using:
+- When ArchLinux gets mounted as chroot, change to $TERMINAL_COLOR_RED_LIGHT cd /root/ $TERMINAL_COLOR_END directory and download it again, give the executable permission and run it by using:
 $TERMINAL_COLOR_RED_LIGHT # ./archlinux.sh -p2 $TERMINAL_COLOR_END
 
 - When the second part from this script gets finished, type:
@@ -75,11 +85,11 @@ $TERMINAL_COLOR_RED_LIGHT # exit $TERMINAL_COLOR_END then $TERMINAL_COLOR_RED_LI
 - Remove the pen drive device and boot the computer. Select the ArchLinux option on GRUB bootloader and log in as root. Finally run this script again by typing:
 $TERMINAL_COLOR_RED_LIGHT # ./archlinux.sh -p3 $TERMINAL_COLOR_END
 
-- If everything works correctly now you are up to ArchLinux normally. Furthermore if you want to install more softwares, log in as normal user and go head by typing:
-$TERMINAL_COLOR_GREEN_LIGHT $ ./archlinux.sh -p4 $TERMINAL_COLOR_END then $TERMINAL_COLOR_GREEN_LIGHT $ systemctl reboot $TERMINAL_COLOR_END
+- If everything works correctly now you are up to ArchLinux normally. Furthermore if you want to install more softwares from this script, log in as normal user and go head by typing:
+$TERMINAL_COLOR_GREEN_LIGHT $ sudo ./archlinux.sh -p4 $TERMINAL_COLOR_END then $TERMINAL_COLOR_GREEN_LIGHT $ sudo systemctl reboot $TERMINAL_COLOR_END
 
 - Finally:
-$TERMINAL_COLOR_GREEN_LIGHT $ ./archlinux.sh -p5 $TERMINAL_COLOR_END then $TERMINAL_COLOR_GREEN_LIGHT $ systemctl reboot $TERMINAL_COLOR_END
+$TERMINAL_COLOR_GREEN_LIGHT $ sudo ./archlinux.sh -p5 $TERMINAL_COLOR_END then $TERMINAL_COLOR_GREEN_LIGHT $ sudo systemctl reboot $TERMINAL_COLOR_END
 
 - Enjoy it!
 
@@ -524,9 +534,11 @@ editing_sudo_properties(){
 
     display_message_success "Sudoers has been successfully set to allow all users to have sudo access"
 
-	#EDITOR=vim visudo
-	#echo "ermanno ALL=(ALL) ALL" >> /etc/sudoers.d/ermanno
+	EDITOR=vim visudo
+
+	#read -p "Inform the username you want: " QUESTION_USERNAME #henrikbeck95
 	#echo "$QUESTION_USERNAME ALL=(ALL) ALL" >> /etc/sudoers.d/$QUESTION_USERNAME
+	#echo "henrikbeck95 ALL=(ALL) ALL" >> /etc/sudoers.d/henrikbeck95
 }
 
 #MUST BE IMPLEMENTED SED CUT FUNCTION - NOT WORKED
@@ -618,8 +630,8 @@ installing_bootloader(){
 	sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
 
 	#vim $FILENAME #Add text: MODULES=(btrfs)
-	mkinitcpio -p linux
-	#mkinitcpio -p linux-lts
+	#mkinitcpio -p linux
+	mkinitcpio -p linux-lts
 
 	#Applying GRUB
 	case $IS_BIOS_UEFI in #MUST BE FIXED
@@ -1684,7 +1696,7 @@ calling_part_02(){
     installing_bootloader
 
     display_message_success "Script has been finished!"
-    display_message_warning "Verify if everything is ok and then go back to the livecd mode by typing:\n\t> $ exit"
+    display_message_warning "Verify if everything is ok and then go back to the livecd mode by typing:\n\t> # exit \n\t> # umount -a \n\t> # poweroff"
 }
 
 calling_part_03(){
