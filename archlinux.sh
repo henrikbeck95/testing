@@ -66,7 +66,7 @@ $TERMINAL_COLOR_RED_LIGHT # curl -O -L $ARCHLINUX_SCRIPT_LINK $TERMINAL_COLOR_EN
 - Then give executable permission to this script and run it
 $TERMINAL_COLOR_RED_LIGHT # chmod +x ./archlinux.sh && ./archlinux.sh -p1 $TERMINAL_COLOR_END
 
-- When ArchLinux gets mounted as chroot, go to $TERMINAL_COLOR_RED_LIGHT /root/ directory $TERMINAL_COLOR_END download it again, give the executable permission and run it by using:
+- When ArchLinux gets mounted as chroot, go to $TERMINAL_COLOR_RED_LIGHT /root/ $TERMINAL_COLOR_END directory and download it again, give the executable permission and run it by using:
 $TERMINAL_COLOR_RED_LIGHT # ./archlinux.sh -p2 $TERMINAL_COLOR_END
 
 - When the second part from this script gets finished, type:
