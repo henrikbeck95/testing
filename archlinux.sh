@@ -190,12 +190,14 @@ tools_install_software_aur(){
 
 			#yay -S $@ --noconfirm
 			#yay -S $@ --noconfirm --needed
+			;;
 		"true") 
 			paru -S $@
 			#paru -S $@ --needed
 
 			#yay -S $@
 			#yay -S $@ --needed
+			;;
 		*) display_message_error "$MESSAGE_ERROR" ;;
 	esac
 }
@@ -203,8 +205,8 @@ tools_install_software_aur(){
 #TESTING
 tools_install_software_flatpak(){
 	case $DEBUG in
-		"false") flatpak install flathub $@ -y
-		"true") flatpak install flathub $@
+		"false") flatpak install flathub $@ -y ;;
+		"true") flatpak install flathub $@ ;;
 		*) display_message_error "$MESSAGE_ERROR" ;;
 	esac
 }
@@ -214,10 +216,12 @@ tools_install_software_pacman(){
 	case $DEBUG in
 		"false") 
 			pacman -S $@ --noconfirm
-			#pacman -S $@ --noconfirm --needed 
+			#pacman -S $@ --noconfirm --needed
+			;;
 		"true") 
 			pacman -S $@
 			#pacman -S $@ --needed
+			;;
 		*) display_message_error "$MESSAGE_ERROR" ;;
 	esac
 }
@@ -226,8 +230,8 @@ tools_install_software_pacman(){
 #MUST BE FIXED
 tools_install_software_pip(){
 	case $DEBUG in
-		"false") pip3 install $@
-		"true") pip3 install $@
+		"false") pip3 install $@ ;;
+		"true") pip3 install $@ ;;
 		*) display_message_error "$MESSAGE_ERROR" ;;
 	esac
 }
@@ -240,9 +244,11 @@ tools_repositories_syncronize_aur(){
 		"false") 
 			paru -Syyuu --noconfirm
 			#yay -Syyuu --noconfirm
+			;;
 		"true") 
 			paru -Syyuu
 			#yay -Syyuu
+			;;
 		*) display_message_error "$MESSAGE_ERROR" ;;
 	esac
 }
@@ -252,10 +258,8 @@ tools_repositories_syncronize_pacman(){
 	display_message "Apply the new ArchLinux settings and check for updates"
 
 	case $DEBUG in
-		"false") 
-			pacman -Syyuu --noconfirm
-		"true") 
-			pacman -Syyuu
+		"false") pacman -Syyuu --noconfirm ;;
+		"true") pacman -Syyuu ;;
 		*) display_message_error "$MESSAGE_ERROR" ;;
 	esac
 }
