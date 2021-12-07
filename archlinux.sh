@@ -86,6 +86,7 @@ $TERMINAL_COLOR_GREEN_LIGHT $ ./archlinux.sh -p5 $TERMINAL_COLOR_END then $TERMI
 [Parameters]
 -h\t--help\t-?\t\tDisplay this help message
 -e\t--edit\t\t\tEdit this script file
+-b\t--check-battery\t\tCheck battery level (on laptop device)
 -p1\t--part-01\t\tInstall ArchLinux system base $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
 -p2\t--part-02\t\tConfigure and install ArchLinux essential system softwares $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
 -p3\t--part-03\t\tInstall ArchLinux drivers, useful softwares and custom shell $TERMINAL_COLOR_RED_LIGHT (ONLY ROOT) $TERMINAL_COLOR_END
@@ -98,26 +99,13 @@ MESSAGE_RESTART="Must restart current session for apply the new settings"
 
 MESSAGE_ERROR="Invalid option for $0!\n$MESSAGE_HELP"
 
+
+
+
+
 #############################
 #Functions - Tools
 #############################
-
-check_if_internet_connection_exists(){
-    echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
-
-    if [ $? -eq 0 ]; then
-        echo "true"
-    else
-        echo "false"
-    fi
-}
-
-check_if_user_has_root_previledges(){
-	if [[ $UID != 0 ]]; then
-		echo -e "You must be root for preduring this installation!"
-		exit 0;
-	fi
-}
 
 display_message(){
 	echo -e "$TERMINAL_COLOR_WHITE \n#############################\n#$1\n#############################\n $TERMINAL_COLOR_END"
@@ -146,6 +134,28 @@ tools_backup_create(){
 
 	#Create a snapshot
 	timeshift --create --comments "$1" --tags D
+}
+
+tools_check_battery_level(){
+	local BATTERY_LEVEL=$(cat /sys/class/power_supply/BAT0/capacity)
+	display_message_success "Battery level current: $BATTERY_LEVEL %"
+}
+
+tools_check_if_internet_connection_exists(){
+    echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
+tools_check_if_user_has_root_previledges(){
+	if [[ $UID != 0 ]]; then
+		echo -e "You must be root for preduring this installation!"
+		exit 0;
+	fi
 }
 
 tools_create_folder(){
@@ -1632,8 +1642,8 @@ partiting_swap_partition(){
 #############################
 
 calling_essential(){
-	check_if_internet_connection_exists
-	check_if_user_has_root_previledges
+	tools_check_if_internet_connection_exists
+	tools_check_if_user_has_root_previledges
 
 	variables_export_bios
 	variables_export_virtualization
@@ -1751,7 +1761,7 @@ calling_testing(){
 	#echo -e "$TERMINAL_TEXT_BACKGROUND_WHITE_CYAN 256-color background, de jure standard (ITU-T T.416) $TERMINAL_TEXT_BACKGROUND_END"
 	#echo -e "$TERMINAL_TEXT_BACKGROUND_WHITE_ORANGE truecolor background, de jure standard (ITU-T T.416) (new in 0.52) $TERMINAL_TEXT_BACKGROUND_END"
 
-	check_if_internet_connection_exists
+	tools_check_if_internet_connection_exists
 	#connecting_internet_wifi
 }
 
@@ -1764,6 +1774,7 @@ clear
 case $AUX1 in
 	"" | "-h" | "--help" | "-?") echo -e "$MESSAGE_HELP" ;;
 	"-e" | "--edit") $EDITOR $0 ;;
+	"-b" | "--check-battery") tools_check_battery_level ;;
 	"-p1" | "--part-01") calling_part_01 ;;
 	"-p2" | "--part-02") calling_part_02 ;;
 	"-p3" | "--part-03") calling_part_03 ;;
