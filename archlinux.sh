@@ -41,9 +41,11 @@ TERMINAL_TEXT_BACKGROUND_END="\e[49m"
 
 LAYOUT_KEYBOARD="br-abnt2"
 
+ARCHLINUX_SCRIPT_LINK="https://raw.githubusercontent.com/henrikbeck95/testing/main/archlinux.sh"
+
 MESSAGE_HELP="
-\t\t\tArchlinux installation setup
-\t\t\t----------------------------\n
+\t\t\t\tArchlinux installation setup
+\t\t\t\t----------------------------
 
 [Credits]
 Author: Henrik Beck
@@ -53,6 +55,30 @@ Version: v.1.0.0
 
 [Description]
 This is a guided step by step for installing a custom ArchLinux with full setup
+
+[Instructions]
+Once you have booted your computer with a ArchLinux pendrive device, download this script by running:
+$TERMINAL_COLOR_RED_LIGHT # curl -O -L $ARCHLINUX_SCRIPT_LINK $TERMINAL_COLOR_END
+
+- Then give executable permission to this script and run it
+$TERMINAL_COLOR_RED_LIGHT # chmod +x ./archlinux.sh && ./archlinux.sh -p1 $TERMINAL_COLOR_END
+
+- When ArchLinux gets mounted as chroot, download it again, give the executable permission and run it by using:
+$TERMINAL_COLOR_RED_LIGHT # ./archlinux.sh -p2 $TERMINAL_COLOR_END
+
+- When the second part from this script gets finished, type:
+$TERMINAL_COLOR_RED_LIGHT # exit $TERMINAL_COLOR_END then $TERMINAL_COLOR_RED_LIGHT # umount -a poweroff $TERMINAL_COLOR_END
+
+- Remove the pen drive device and boot the computer. Select the ArchLinux option on GRUB bootloader and log in as root. Finally run this script again by typing:
+$TERMINAL_COLOR_RED_LIGHT # ./archlinux.sh -p3 $TERMINAL_COLOR_END
+
+- If everything works correctly now you are up to ArchLinux normally. Furthermore if you want to install more softwares, log in as normal user and go head by typing:
+$TERMINAL_COLOR_GREEN_LIGHT $ ./archlinux.sh -p4 $TERMINAL_COLOR_END then $TERMINAL_COLOR_GREEN_LIGHT $ systemctl reboot $TERMINAL_COLOR_END
+
+- Finally:
+$TERMINAL_COLOR_GREEN_LIGHT $ ./archlinux.sh -p5 $TERMINAL_COLOR_END then $TERMINAL_COLOR_GREEN_LIGHT $ systemctl reboot $TERMINAL_COLOR_END
+
+- Enjoy it!
 
 [Parameters]
 -h\t--help\t-?\t\tDisplay this help message
@@ -73,7 +99,6 @@ MESSAGE_ERROR="Invalid option for $0!\n$MESSAGE_HELP"
 #Functions - Tools
 #############################
 
-#MUST BE FIXED
 check_if_internet_connection_exists(){
     echo -e "GET http://google.com HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
 
@@ -93,7 +118,6 @@ check_if_user_has_root_previledges(){
 
 display_message(){
 	echo -e "$TERMINAL_COLOR_WHITE \n#############################\n#$1\n#############################\n $TERMINAL_COLOR_END"
-	#echo -e "$TERMINAL_COLOR_END \n#############################\n#$1\n#############################\n $TERMINAL_COLOR_END"
 }
 
 display_message_success(){
@@ -109,6 +133,8 @@ display_message_warning(){
 }
 
 tools_backup_create(){
+    display_message "Creating Timeshift backup"
+
 	#Change Timeshift engine
 	timeshift --btrfs
 
@@ -124,6 +150,8 @@ tools_create_folder(){
 }
 
 tools_download_file(){
+    display_message "Download $1 file"
+
 	#cURL
 	case $# in
 		1) curl -L -O $1 ;;
@@ -190,7 +218,6 @@ tools_repositories_syncronize_pacman(){
 
 variables_export_bios(){
 	PATH_SCRIPT="$(dirname "$(readlink -f "$0")")"
-	ARCHLINUX_SCRIPT_LINK="https://raw.githubusercontent.com/henrikbeck95/testing/main/archlinux"
 	ARCHLINUX_SCRIPT_PATH="$PATH_SCRIPT/"
 	#ARCHLINUX_SCRIPT_PATH="$HOME/"
 	#ARCHLINUX_SCRIPT_PATH="/root/"
@@ -253,6 +280,8 @@ changing_hostname(){
 	127.0.0.1\t\tlocalhost
 	::1\t\t\tlocalhost
 	127.0.0.1\t\t$QUESTION_HOST.localdomain\t\t$QUESTION_HOST" >> /etc/hosts
+
+    display_message_success "Hostname has been successfully set as $QUESTION_HOST to /etc/hosts"
 }
 
 changing_language(){
@@ -265,11 +294,15 @@ changing_language(){
 	#echo LANG=pt_BR.UTF-8 >> /etc/locale.conf
 
 	echo KEYMAP=br-abnt2 >> /etc/vconsole.conf
+
+    display_message_success "Language has been successfully set as LANG=en_US.UTF-8 to /etc/locale.conf and KEYMAP=br-abnt2 to /etc/vconsole.conf"
 }
 
 changing_language_keyboard(){
 	display_message "Changing the keyboard layout settings"
 	loadkeys $LAYOUT_KEYBOARD
+
+    display_message_success "Loadkeys has been successfully as $LAYOUT_KEYBOARD"
 }
 
 changing_language_default(){
@@ -286,6 +319,8 @@ changing_language_default(){
 	
 	#Apply the new settings
 	export LANG=pt_BR.UTF-8
+
+    display_message_success "Keymap has been successfully set as $TEXT_NEW to $FILENAME"
 }
 
 changing_password_root(){
@@ -305,6 +340,8 @@ changing_timezone(){
 
 	#timedatectl set-ntp true
 	#hwclock --systohc #Hardware clock
+
+    display_message_success "Timezone has been successfully set"
 }
 
 mount_chroot(){
@@ -316,11 +353,12 @@ creating_fstab(){
 	display_message "Generate the /etc/fstab file"
 	genfstab -U /mnt >> /mnt/etc/fstab
 
+    display_message_success "Fstab has been successfully generated"
+
 	#Check if the /etc/fstab file was generated correctly
 	cat /mnt/etc/fstab
 }
 
-#MUST BE TESTED
 creating_new_user(){
 	display_message "Create a new user account to be ready to log in after the installation setup is done"
 
@@ -345,7 +383,6 @@ creating_new_user(){
 	gpasswd -a $QUESTION_USERNAME video
 }
 
-#MUST BE TESTED
 connecting_internet_wifi(){
 	display_message "Connect to Wi-Fi network"
 
@@ -382,13 +419,13 @@ connecting_internet_wifi(){
 	done
 }
 
-#MUST BE TESTED
 #MUST BE IMPLEMENTED SED CUT FUNCTION
 connecting_ssh(){
 	display_message "Install OpenSSH software"
 	pacman -Syy openssh
 	systemctl enable --now sshd.service
 	tools_edit_file /etc/ssh/sshd_config #Uncomment the port 22
+    display_message_success "OpenSSH software has been installed"
 	
 	display_message "Change Root password"
 	passwd root
@@ -406,6 +443,8 @@ connecting_ssh(){
 }
 
 database_software_reflector(){
+    display_message "Sorting Pacman repository database to speed up downloading the packages"
+
 	timedatectl set-ntp true
 	hwclock --systohc
 
@@ -415,6 +454,8 @@ database_software_reflector(){
 	firewall-cmd --add-port=1025-65535/tcp --permanent
 	firewall-cmd --add-port=1025-65535/udp --permanent
 	firewall-cmd --reload
+
+    display_message_success "Pacman repository database has been sorted successfully"
 }
 
 editing_sudo_properties(){
@@ -427,9 +468,11 @@ editing_sudo_properties(){
 	TEXT_NEW="%wheel ALL=(ALL) ALL"
 	sed -i "s/$TEXT_OLD/$TEXT_NEW/g" $FILENAME
 
-	#echo "ermanno ALL=(ALL) ALL" >> /etc/sudoers.d/ermanno
+    display_message_success "Sudoers has been successfully set to allow all users to have sudo access"
 
-	EDITOR=vim visudo
+	#EDITOR=vim visudo
+	#echo "ermanno ALL=(ALL) ALL" >> /etc/sudoers.d/ermanno
+	#echo "$QUESTION_USERNAME ALL=(ALL) ALL" >> /etc/sudoers.d/$QUESTION_USERNAME
 }
 
 #MUST BE IMPLEMENTED SED CUT FUNCTION - NOT WORKED
@@ -438,7 +481,8 @@ enabling_support_32_bits(){
 
 	while true; do
 		read -p "Do you want to enable 32 bits support? [Y/n] " QUESTION_PARTITION
-		case $QUESTION_PARTITION in
+		
+        case $QUESTION_PARTITION in
 			[Yy]*)
 				#Uncomment the multilib and multilib-testing modules
 				local FILENAME="/etc/pacman.conf"
@@ -540,6 +584,8 @@ installing_bootloader(){
 			grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
 
 			grub-mkconfig -o /boot/grub/grub.cfg
+
+        	display_message_success "GRUB gootloader has been successfully installed"
 			;;
 		*)
 			display_message_error "The BIOS could not be identified!"
@@ -564,12 +610,14 @@ install_driver_audio(){
                     pipewire-pulse \
                     pipewire-jack
 				
+	                display_message_success "Pipeware has been successfully installed"
                 break
 				;;
 			"pulseaudio")
             	tools_install_software_pacman \
                     pulseaudio
 
+	                display_message_success "Pulseaudio has been successfully installed"
 				break
 				;;
 			"none") break ;;
@@ -579,34 +627,33 @@ install_driver_audio(){
 }
 
 install_driver_bluetooth(){
+    display_message "Install bluetooth drivers"
+
 	tools_install_software_pacman \
         bluez \
         bluez-utils
 
 	systemctl enable --now bluetooth
+    display_message_success "Bluetooth drivers have been successfully installed"
 }
 
 install_driver_printer(){
+    display_message "Install printer drivers"
+
 	tools_install_software_pacman \
         cups
 
 	systemctl enable --now cups.service
+    display_message_success "Printer drivers have been successfully installed"
 }
 
 install_driver_graphic_video(){
-	display_message "Install video driver"
-
-    display_message"Install video driver for VirtualBox virtual machine video driver"
-	tools_install_software_pacman \
-        virtualbox-guest-utils
-
-    display_message"Install video driver for VMWare virtual machine video driver"
-	tools_install_software_pacman \
+    display_message "Install video driver for VirtualBox, X Window System QXL (including Xspice server) and VMWare virtual machine video driver"
+    
+    tools_install_software_pacman \
+        virtualbox-guest-utils \
+        xf86-video-qxl \
         xf86-video-vmware
-
-    display_message"Install video driver for X Window System QXL driver including Xspice server for virtual machine"
-	tools_install_software_pacman \
-        xf86-video-qxl
 
 	while true; do
         #Select the option according to your graphic video manufacturer.
@@ -619,12 +666,14 @@ install_driver_graphic_video(){
 				tools_install_software_pacman \
                     xf86-video-amdgpu
 
+                display_message_success "Video driver has been successfully installed for AMD cards"
 				break
 				;;
 			"intel")
 				tools_install_software_pacman \
                     xf86-video-intel
 
+                display_message_success "Video driver has been successfully installed for Intel cards"
 				break
 				;;
 			"nvidia")
@@ -633,6 +682,7 @@ install_driver_graphic_video(){
                     nvidia-utils \
                     nvidia-settings
 
+                display_message_success "Video driver has been successfully installed for Nvidia cards"
 				break
 				;;
 			"none") break ;;
@@ -674,7 +724,6 @@ install_desktop_enviroment_main(){
 	done
 }
 
-#MUST BE FIXED
 install_desktop_enviroment_deepin(){
     tools_install_software_pacman \
 		xorg \
@@ -688,6 +737,7 @@ install_desktop_enviroment_deepin(){
 
 	systemctl enable lightdm.service
 
+    display_message_success "Deepin as desktop environment has been successfully installed"
 	display_message_warning "$MESSAGE_RESTART"
 }
 
@@ -701,6 +751,7 @@ install_desktop_enviroment_gnome(){
 
 	systemctl enable gdm
 
+    display_message_success "Gnome as desktop environment has been successfully installed"
 	display_message_warning "$MESSAGE_RESTART"
 }
 
@@ -716,6 +767,9 @@ install_desktop_enviroment_i3(){
 		rofi
 	
 	install_lock_screen
+
+    display_message_success "I3 as desktop environment has been successfully installed"
+	display_message_warning "$MESSAGE_RESTART"
 }
 
 install_desktop_enviroment_kde(){
@@ -728,6 +782,7 @@ install_desktop_enviroment_kde(){
 
 	systemctl enable sddm
 
+    display_message_success "KDE as desktop environment has been successfully installed"
 	display_message_warning "$MESSAGE_RESTART"
 }
 
@@ -742,13 +797,18 @@ install_desktop_enviroment_xfce(){
 
 	systemctl enable lightdm
 
+    display_message_success "XFCE as desktop environment has been successfully installed"
 	display_message_warning "$MESSAGE_RESTART"
 }
 
 install_desktop_utils(){
+    display_message "Install desktop utils"
+
 	tools_install_software_pacman \
         xdg-user-dirs \
         xdg-utils
+
+    display_message_success "Desktop utils have been successfully installed"
 }
 
 install_lock_screen(){
@@ -767,6 +827,7 @@ install_lock_screen(){
                 systemctl enable lightdm.service -f
                 systemctl set-default graphical.target
                 
+	            display_message_success "LightDM has been installed as lock screen"
 				break
 				;;
             "ly")
@@ -776,6 +837,7 @@ install_lock_screen(){
                 
                 systemctl enable ly.service
 
+	            display_message_success "Ly has been installed as lock screen"
 				break
 				;;
 			"none") break ;;
@@ -787,14 +849,20 @@ install_lock_screen(){
 }
 
 install_network_interface(){
+    display_message "Install network insface"
+
 	tools_install_software_pacman \
         dhcpcd
 
 	systemctl enable --now dhcpcd
+
+    display_message_success "Network interface has been successfully installed"
 }
 
 install_shell_zsh(){
-	#Install ZSH shell
+    display_message "Install ZSH shell"
+	
+    #Install ZSH shell
     tools_install_software_pacman \
         zsh \
         zsh-autosuggestions \
@@ -805,10 +873,14 @@ install_shell_zsh(){
 	echo -e $SHELL
 	cat /etc/shells
 	chsh -s /usr/bin/zsh
+    
+    display_message_success "ZSH shell has been successfully installed"
 	display_message_warning "$MESSAGE_RESTART"
 }
 
 install_softwares_aur(){
+    display_message "Install softwares from ArchLinux User Repository(AUR)"
+
 	tools_install_software_aur \
 		barrier \
 		cava \
@@ -831,18 +903,26 @@ install_softwares_aur(){
 		#spotify-adblock \
 		#spotirec \
 		#ttf-ms-fonts
+
+    display_message_success "Softwares from ArchLinux User Repository(AUR) have been installed"
 }
 
 #MUST BE IMPROVED
 install_softwares_binary(){
 	#LF file manager
+    display_message "Install softwares from Binary - LF file manage"
+
 	cd /tmp/
 	tools_download_file https://github.com/gokcehan/lf/releases/download/r26/lf-linux-amd64.tar.gz
 	tar -xf /tmp/lf-linux-amd64.tar.gz
 	mv /tmp/lf /usr/local/bin/lf
 	cd -
 
+    display_message_success "LF file manager has been installed from binary"
+
 	#Install Oh-My-Posh with all themes
+    display_message "Install softwares from Binary - Oh-My-Posh!"
+
 	wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh
 	chmod +x /usr/local/bin/oh-my-posh
 	tools_create_folder $HOME/.poshthemes
@@ -850,24 +930,36 @@ install_softwares_binary(){
 	unzip $HOME/.poshthemes/themes.zip -d $HOME/.poshthemes
 	chmod u+rw $HOME/.poshthemes/*.json
 	rm $HOME/.poshthemes/themes.zip
+
+    display_message_success "Oh-My-Posh! has been installed from binary"
 }
 
 install_softwares_compilation(){
 	#Paru
+    display_message "Install softwares from compiation - Paru"
+
 	tools_create_folder $HOME/compilation/
 	git clone https://aur.archlinux.org/paru.git $HOME/compilation/paru
 
 	cd $HOME/compilation/paru/
 	makepkg -si
 	cd -
+
+    display_message_success "Softwares from compilation has been installed - Paru"
 }
 
 install_softwares_github(){
 	#ASDF
+    display_message "Install softwares from GitHub - ASDF"
+
 	git clone https://github.com/asdf-vm/asdf.git $HOME/.asdf --branch v0.8.1
+
+    display_message_success "Softwares from GitHub has been installed - ASDF"
 }
 
 install_softwares_flatpak(){
+    display_message "Install softwares from Flatpak"
+
     tools_install_software_flatpak \
         org.kde.ark \
         com.github.debauchee.barrier \
@@ -933,9 +1025,13 @@ install_softwares_flatpak(){
         #com.sweethome3d.Sweethome3d \
         #com.unity.UnityHub \
         #com.vscodium.codium
+
+    display_message_success "Softwares from Flatpak has been installed"
 }
 
 install_softwares_pacman_essential(){
+    display_message "Install softwares from Pacman - essential"
+
 	#Useful
 	tools_install_software_pacman \
         alacritty \
@@ -948,7 +1044,6 @@ install_softwares_pacman_essential(){
         gparted \
         htop \
         jq \
-        linux-lts \
         lsb-release \
         neofetch \
         ntfs-3g \
@@ -979,7 +1074,6 @@ install_softwares_pacman_essential(){
 		firewalld \
 		gvfs \
 		gvfs-smb \
-		hplip \
 		inetutils \
 		ipset \
 		nfs-utils \
@@ -987,6 +1081,7 @@ install_softwares_pacman_essential(){
 		sof-firmware
 
 		#gufw #Firewall
+		#hplip #HP printer
 
 	systemctl enable avahi-daemon
 	systemctl enable acpid
@@ -994,9 +1089,13 @@ install_softwares_pacman_essential(){
 	systemctl enable fstrim.timer
 	systemctl enable reflector.timer
 	systemctl enable tlp #Improve battery life for laptop.
+
+    display_message_success "Softwares from Pacman has been installed - essential"
 }
 
 install_softwares_pacman_extra(){
+    display_message "Install softwares from Pacman - extra"
+
 	tools_install_software_pacman \
 		dolphin \
 		gthumb \
@@ -1014,9 +1113,13 @@ install_softwares_pacman_extra(){
 		#obs-studio \
 		#simplescreenrecorder \
 		#vlc
+
+    display_message_success "Softwares from Pacman has been installed - extra"
 }
 
 install_softwares_pacman_manually(){
+    display_message "Install softwares from Pacman - manually"
+
 	tools_create_folder $HOME/compilation/pacman/
 	cd $HOME/compilation/pacman/
 
@@ -1033,23 +1136,35 @@ install_softwares_pacman_manually(){
 	pacman -U $HOME/compilation/gestures-0.2.5-1-any.pkg.tar.zst
 
 	cd -
+
+    display_message_success "Softwares from Pacman has been installed - manually"
 }
 
 install_softwares_pip(){
+    display_message "Install softwares from Python - Pip"
+
     tools_install_software_pip \
     	lyrics-in-terminal \
     	safeeyes
+
+    display_message_success "Softwares from Python has been installed - Pip"
 }
 
 install_support_debtap(){
+    display_message "Install software platform Debtap"
+
     tools_install_software_aur \
 		debtap
 
 	debtap -u
+
+    display_message_success "Deptap software platform has been installed"
 }
 
 #MUST BE TESTED
 install_support_docker(){
+    display_message "Install software platform Docker"
+
     #Installation
 	tools_install_software_pacman \
 		docker \
@@ -1068,23 +1183,35 @@ install_support_docker(){
 
     #Verify that you can run docker commands without sudo
 	#docker run hello-world
+
+    display_message_success "Docker software platform has been installed"
 }
 
 install_support_flatpak(){
+    display_message "Install software platform Flatpak"
+
 	#Flatpak
 	tools_install_software_pacman \
         flatpak
 
 	display_message_warning "$MESSAGE_RESTART"
+
+    display_message_success "Flatpak software platform has been installed"
 }
 
 install_support_pip(){
+    display_message "Install software platform Python Pip"
+
     tools_install_software_pacman \
         python-pip
+
+    display_message_success "Python Pip software platform has been installed"
 }
 
 #MUST BE FIXED
 install_support_podman(){
+    display_message "Install software platform Podman"
+
 	tools_edit_file /etc/default/grub
 	#Edit the line: GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet video=1920x1080 cgroup_no_v1 "all""
 
@@ -1111,6 +1238,7 @@ install_support_podman(){
 	#Rootless
 	touch /etc/{subuid,subgid}
 
+	read -p "Inform the username you want: " QUESTION_USERNAME #henrikbeck95
 	usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $QUESTION_USERNAME
 	grep $QUESTION_USERNAME /etc/subgid /etc/subuid
 	
@@ -1178,11 +1306,15 @@ install_support_podman(){
 	#podman ps -a
 	#
 	##############################
+
+    display_message_success "Podman software platform has been installed"
 }
 
 #MUST BE FIXED
 #MUST BE IMPROVED
 install_support_qemu(){
+    display_message "Install software platform QEMU"
+
 	#Reference
 	#[Arch Linux: Instalação do virt-manager](https://www.youtube.com/watch?v=FGeI4nSOHto)
 	#[](https://computingforgeeks.com/install-kvm-qemu-virt-manager-arch-manjar/)
@@ -1219,6 +1351,7 @@ install_support_qemu(){
 	systemctl enable --now dnsmasq.service
 
 	#Add user to the following groups
+	read -p "Inform the username you want: " QUESTION_USERNAME #henrikbeck95
 	gpasswd -a $QUESTION_USERNAME libvirt
 	#usermod -G libvirt -a $QUESTION_USERNAME
 	#usermod -aG libvirt $QUESTION_USERNAME
@@ -1243,9 +1376,13 @@ install_support_qemu(){
 
 	#Access Cockpit localhost from browser
 	#xdg-open https://localhost:9090/
+
+    display_message_success "QEMU software platform has been installed"
 }
 
 install_support_snap(){
+    display_message "Install software platform Snap"
+
     tools_install_software_pacman \
         snapd
 
@@ -1253,31 +1390,40 @@ install_support_snap(){
     systemctl enable --now snapd.socket
 
 	display_message_warning "$MESSAGE_RESTART"
+
+    display_message_success "Snap software platform has been installed"
 }
 
 install_support_ssh(){
+    display_message "Install software platform SSH"
+
 	display_message "Installing SSH connect support"
 		
 	tools_install_software_pacman \
 		openssh
 
 	systemctl enable --now sshd.service
+
+    display_message_success "SSH software platform has been installed"
 }
 
 install_support_wine(){
+    display_message "Install software platform WINE"
+
 	tools_install_software_pacman \
 		wine \
 		winetricks
+
+    display_message_success "WINE software platform has been installed"
 }
 
 install_system_base(){
-	display_message "Install the system base"
+    display_message "Install ArchLinux system base"
 
 	pacstrap /mnt/ \
 		base \
 		btrfs-progs \
 		linux-firmware \
-		linux-lts \
 		vim
 
 	case $PROCESSOR in
@@ -1288,6 +1434,8 @@ install_system_base(){
 			exit 0
 		;;
 	esac
+
+    display_message_success "ArchLinux system base has been installed"
 }
 
 partiting_disk(){
@@ -1314,11 +1462,13 @@ partiting_disk(){
 
 	#Listing all the partition table
 	lsblk
+
+    display_message_success "Partitions have been formatted"
 }
 
 #MUST BE FIXED
 partiting_mounting(){
-	display_message "Mount the partitions"
+	display_message "Mount the BTRFS partitions"
 
 	#Mounting the root partition
 	mount $PARTITION_ROOT /mnt/
@@ -1360,6 +1510,8 @@ partiting_mounting(){
 
 	#Listing all the partition table
 	lsblk
+
+    display_message_success "BTRFS partitions have been mounted"
 }
 
 partiting_swap(){
@@ -1404,6 +1556,8 @@ partiting_swap_file(){
 	
 	#Check /etc/fstab file
 	tools_edit_file /etc/fstab #text
+
+    display_message_success "SWAP file has been configured"
 }
 
 partiting_swap_partition(){
@@ -1411,28 +1565,8 @@ partiting_swap_partition(){
 
 	mkswap -f $PARTITION_SWAP
 	swapon $PARTITION_SWAP
-}
 
-#############################
-#Functions - Legacy
-#############################
-
-setup_installation_script_download(){
-	cd $ARCHLINUX_SCRIPT_PATH/
-	
-	display_message "Downloading the scripts"
-	tools_download_file $ARCHLINUX_SCRIPT_LINK/main.sh
-	tools_download_file $ARCHLINUX_SCRIPT_LINK/archlinux_part_1.sh
-	tools_download_file $ARCHLINUX_SCRIPT_LINK/archlinux_part_2.sh
-	tools_download_file $ARCHLINUX_SCRIPT_LINK/archlinux_part_3.sh
-	tools_download_file $ARCHLINUX_SCRIPT_LINK/archlinux_part_4.sh
-	
-	display_message "Giving the executable permission to the scripts"
-	chmod +x $ARCHLINUX_SCRIPT_PATH/main.sh
-	chmod +x $ARCHLINUX_SCRIPT_PATH/archlinux_part_1.sh
-	chmod +x $ARCHLINUX_SCRIPT_PATH/archlinux_part_2.sh
-	chmod +x $ARCHLINUX_SCRIPT_PATH/archlinux_part_3.sh
-	chmod +x $ARCHLINUX_SCRIPT_PATH/archlinux_part_4.sh
+    display_message_success "SWAP partiton has been configured"
 }
 
 #############################
@@ -1447,7 +1581,6 @@ calling_essential(){
 	variables_export_virtualization
 	variables_export_processor
 
-	#setup_installation_script_download
 	cd $ARCHLINUX_SCRIPT_PATH/
 }
 
@@ -1500,13 +1633,14 @@ calling_part_03(){
     install_driver_printer
     install_driver_graphic_video
     install_network_interface
-	database_software_reflector
 	install_softwares_pacman_essential
 	install_softwares_pacman_extra
 	install_softwares_pacman_manually
 	install_softwares_binary
 	install_support_qemu
 	install_shell_zsh
+
+    database_software_reflector
 
 	tools_backup_create "After install ArchLinux"
 
@@ -1522,6 +1656,8 @@ calling_part_04(){
 	install_support_podman
 	install_support_snap
 	install_support_wine
+
+	tools_backup_create "After install platforms softwares support"
 }
 
 calling_part_05(){
@@ -1534,6 +1670,8 @@ calling_part_05(){
 
 	tools_repositories_syncronize_aur
 	tools_repositories_syncronize_pacman
+
+	tools_backup_create "After install useful softwares"
 }
 
 calling_testing(){
