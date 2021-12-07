@@ -1842,7 +1842,7 @@ calling_part_02(){
     creating_new_user
     editing_sudo_properties
     install_support_ssh
-	#kernel_linux_install_part_02
+	kernel_linux_install_part_02
     installing_bootloader
 
     display_message_success "Script has been finished!"
