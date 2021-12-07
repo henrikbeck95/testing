@@ -99,10 +99,6 @@ MESSAGE_RESTART="Must restart current session for apply the new settings"
 
 MESSAGE_ERROR="Invalid option for $0!\n$MESSAGE_HELP"
 
-
-
-
-
 #############################
 #Functions - Tools
 #############################
